@@ -1,0 +1,6 @@
+{
+    "file": "./test.txt",
+    "domain": "polar",
+    "command": "echo Hello",
+    "backupDir": "./backups"
+}
