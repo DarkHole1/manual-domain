@@ -82,7 +82,7 @@ func main() {
 				page.Execute(w, "Случилась непонятная внутренняя ошибка")
 				return
 			}
-			err = os.WriteFile(path.Join(conf.BackupDir, conf.File+"."+time.Now().Format("2006-01-02-15-04-05")), data, 0644)
+			err = os.WriteFile(path.Join(conf.BackupDir, path.Base(conf.File)+"."+time.Now().Format("2006-01-02-15-04-05")), data, 0644)
 			if err != nil {
 				log.Printf("Error occured: %s\n", err.Error())
 				page.Execute(w, "Случилась ошибка при создании бэкапа")
