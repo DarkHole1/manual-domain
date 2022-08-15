@@ -82,7 +82,11 @@ func main() {
 				page.Execute(w, "Случилась непонятная внутренняя ошибка")
 				return
 			}
-			os.WriteFile(path.Join(conf.BackupDir, conf.File+"."+time.Now().Format("2006-01-02-15-04-05")), data, 0644)
+			err = os.WriteFile(path.Join(conf.BackupDir, conf.File+"."+time.Now().Format("2006-01-02-15-04-05")), data, 0644)
+			if err != nil {
+				log.Printf("Error occured: %s\n", err.Error())
+				page.Execute(w, "Случилась ошибка при создании бэкапа")
+			}
 			newLines := []string{}
 			for _, line := range strings.Split(string(data), "\n") {
 				if strings.HasPrefix(line, fmt.Sprintf("%s IN A ", conf.Domain)) || strings.HasPrefix(line, fmt.Sprintf("%s IN AAAA ", conf.Domain)) {
