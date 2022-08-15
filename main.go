@@ -20,6 +20,7 @@ type Configuration struct {
 	Host      string
 	Command   string
 	BackupDir string
+	Addresses []string
 }
 
 func ReadConfig() Configuration {
@@ -145,9 +146,14 @@ func main() {
 		page.Execute(w, FT{currentIps, "", conf.Host, conf.Domain})
 	})
 
-	go func() {
-		log.Fatal(http.ListenAndServe(":8081", nil))
-	}()
-	log.Printf("2")
-	log.Fatal(http.ListenAndServe(":8082", nil))
+	if len(conf.Addresses) < 1 {
+		log.Fatal("No addresses to listen")
+	}
+	last := conf.Addresses[len(conf.Addresses)-1]
+	for _, addr := range conf.Addresses[:len(conf.Addresses)-1] {
+		go func(addr string) {
+			log.Fatal(http.ListenAndServe(addr, nil))
+		}(addr)
+	}
+	log.Fatal(http.ListenAndServe(last, nil))
 }

@@ -3,5 +3,9 @@
     "domain": "ns.ext",
     "host": "polar",
     "command": "echo Hello",
-    "backupDir": "./backups"
+    "backupDir": "./backups",
+    "addresses": [
+        ":8081",
+        ":8082"
+    ]
 }
