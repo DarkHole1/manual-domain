@@ -38,13 +38,31 @@ type FT struct {
 	Message string
 }
 
+func ReadCurrentIPs(conf Configuration) string {
+	data, err := os.ReadFile(conf.File)
+	if err != nil {
+		log.Printf("Error occured: %s\n", err)
+		return ""
+	}
+	res := []string{}
+	for _, line := range strings.Split(string(data), "\n") {
+		if strings.HasPrefix(line, fmt.Sprintf("%s\tIN\tA\t", conf.Domain)) {
+			res = append(res, strings.TrimPrefix(line, fmt.Sprintf("%s\tIN\tA\t", conf.Domain)))
+		}
+		if strings.HasPrefix(line, fmt.Sprintf("%s\tIN\tAAAA\t", conf.Domain)) {
+			res = append(res, strings.TrimPrefix(line, fmt.Sprintf("%s\tIN\tAAAA\t", conf.Domain)))
+		}
+	}
+	return strings.Join(res, "\n")
+}
+
 func main() {
 
 	conf := ReadConfig()
 	page := template.Must(template.ParseFiles("./index.html"))
-	currentIps := "???\n???"
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		currentIps := ReadCurrentIPs(conf)
 		if r.Method == "POST" {
 			err := r.ParseForm()
 			if err != nil {
@@ -105,6 +123,10 @@ func main() {
 				log.Printf("Error occured: " + err.Error())
 				page.Execute(w, FT{currentIps, "Случилась непонятная внутренняя ошибка"})
 				return
+			}
+			currentIps = ""
+			for _, ip := range ipsParsed {
+				currentIps += ip.String() + "\n"
 			}
 			cmd := exec.Command("sh", "-c", conf.Command)
 			if out, err := cmd.CombinedOutput(); err != nil {
