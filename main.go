@@ -145,5 +145,9 @@ func main() {
 		page.Execute(w, FT{currentIps, "", conf.Host, conf.Domain})
 	})
 
-	log.Fatal(http.ListenAndServe(":8081", nil))
+	go func() {
+		log.Fatal(http.ListenAndServe(":8081", nil))
+	}()
+	log.Printf("2")
+	log.Fatal(http.ListenAndServe(":8082", nil))
 }
