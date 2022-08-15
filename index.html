@@ -6,10 +6,10 @@
 
 <body>
   <h2>Обновить DNS записи</h2>
-  <div>{{.}}</div>
+  <div>{{.Message}}</div>
   <form action="/" method="post">
     <div>
-      <textarea name="ips" cols="40" rows="10"></textarea>
+      <textarea name="ips" cols="40" rows="10">{{.IPs}}</textarea>
     </div>
     <button>Отправить</button>
   </form>

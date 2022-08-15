@@ -33,23 +33,29 @@ func ReadConfig() Configuration {
 	return configuration
 }
 
+type FT struct {
+	IPs     string
+	Message string
+}
+
 func main() {
 
 	conf := ReadConfig()
 	page := template.Must(template.ParseFiles("./index.html"))
+	currentIps := "???\n???"
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			err := r.ParseForm()
 			if err != nil {
 				log.Printf("Error occured: %s\n", err.Error())
-				page.Execute(w, "Случилась непонятная внутренняя ошибка")
+				page.Execute(w, FT{currentIps, "Случилась непонятная внутренняя ошибка"})
 				return
 			}
 
 			ips := r.PostForm.Get("ips")
 			if ips == "" {
-				page.Execute(w, "Запрос пустой или некорректный")
+				page.Execute(w, FT{currentIps, "Запрос пустой или некорректный"})
 				return
 			}
 			ipsSplitted := strings.Split(ips, "\n")
@@ -61,7 +67,7 @@ func main() {
 				}
 				ipParsed := net.ParseIP(ipCleaned)
 				if ipParsed == nil {
-					page.Execute(w, "Я не смог разобрать IP \""+ipCleaned+"\"")
+					page.Execute(w, FT{currentIps, "Я не смог разобрать IP \"" + ipCleaned + "\""})
 					return
 				}
 				ipsParsed = append(ipsParsed, ipParsed)
@@ -79,13 +85,13 @@ func main() {
 			data, err := os.ReadFile(conf.File)
 			if err != nil {
 				log.Printf("Error occured: " + err.Error())
-				page.Execute(w, "Случилась непонятная внутренняя ошибка")
+				page.Execute(w, FT{currentIps, "Случилась непонятная внутренняя ошибка"})
 				return
 			}
 			err = os.WriteFile(path.Join(conf.BackupDir, path.Base(conf.File)+"."+time.Now().Format("2006-01-02-15-04-05")), data, 0644)
 			if err != nil {
 				log.Printf("Error occured: %s\n", err.Error())
-				page.Execute(w, "Случилась ошибка при создании бэкапа")
+				page.Execute(w, FT{currentIps, "Случилась ошибка при создании бэкапа"})
 			}
 			newLines := []string{}
 			for _, line := range strings.Split(string(data), "\n") {
@@ -97,21 +103,21 @@ func main() {
 			err = os.WriteFile(conf.File, []byte(strings.Join(newLines, "\n")+res), 0644)
 			if err != nil {
 				log.Printf("Error occured: " + err.Error())
-				page.Execute(w, "Случилась непонятная внутренняя ошибка")
+				page.Execute(w, FT{currentIps, "Случилась непонятная внутренняя ошибка"})
 				return
 			}
 			cmd := exec.Command("sh", "-c", conf.Command)
 			if out, err := cmd.CombinedOutput(); err != nil {
 				log.Printf("Error occured: %s", err)
 				log.Printf("Output: %s", string(out))
-				page.Execute(w, "Не получилось перезапустить DNS, смотрите в логи")
+				page.Execute(w, FT{currentIps, "Не получилось перезапустить DNS, смотрите в логи"})
 				return
 			}
-			page.Execute(w, "Всё прошло хорошо")
+			page.Execute(w, FT{currentIps, "Всё прошло хорошо"})
 			return
 		}
 
-		page.Execute(w, "")
+		page.Execute(w, FT{currentIps, ""})
 	})
 
 	log.Fatal(http.ListenAndServe(":8081", nil))
