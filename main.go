@@ -70,9 +70,9 @@ func main() {
 			res := ""
 			for _, ip := range ipsParsed {
 				if ip.To4() != nil {
-					res += fmt.Sprintf("%s IN A %s\n", conf.Domain, ip.String())
+					res += fmt.Sprintf("%s\tIN\tA\t%s\n", conf.Domain, ip.String())
 				} else {
-					res += fmt.Sprintf("%s IN AAAA %s\n", conf.Domain, ip.String())
+					res += fmt.Sprintf("%s\tIN\tAAAA\t%s\n", conf.Domain, ip.String())
 				}
 			}
 
@@ -89,7 +89,7 @@ func main() {
 			}
 			newLines := []string{}
 			for _, line := range strings.Split(string(data), "\n") {
-				if strings.HasPrefix(line, fmt.Sprintf("%s IN A ", conf.Domain)) || strings.HasPrefix(line, fmt.Sprintf("%s IN AAAA ", conf.Domain)) {
+				if strings.HasPrefix(line, fmt.Sprintf("%s\tIN\tA\t", conf.Domain)) || strings.HasPrefix(line, fmt.Sprintf("%s\tIN\tAAAA\t", conf.Domain)) {
 					continue
 				}
 				newLines = append(newLines, line)
