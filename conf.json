@@ -1,6 +1,7 @@
 {
     "file": "./test.txt",
-    "domain": "polar",
+    "domain": "ns.ext",
+    "host": "polar",
     "command": "echo Hello",
     "backupDir": "./backups"
 }
