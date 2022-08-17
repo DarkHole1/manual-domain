@@ -7,7 +7,7 @@ import (
 	"log"
 )
 
-// Result type. Stores value or error
+// Result type. Stores value or error. You can think it's (value, error)
 type Result[T any] struct {
 	value T
 	err   error
