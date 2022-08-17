@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -14,27 +13,6 @@ import (
 	"time"
 )
 
-type Configuration struct {
-	File      string
-	Domain    string
-	Host      string
-	Command   string
-	BackupDir string
-	Addresses []string
-}
-
-func ReadConfig() Configuration {
-	file, _ := os.Open("conf.json")
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	configuration := Configuration{}
-	err := decoder.Decode(&configuration)
-	if err != nil {
-		log.Fatal("Error reading config: ", err.Error())
-	}
-	return configuration
-}
-
 type FT struct {
 	IPs     string
 	Message string
@@ -42,7 +20,7 @@ type FT struct {
 	Zone    string
 }
 
-func ReadCurrentIPs(conf Configuration) string {
+func ReadCurrentIPs(conf Config) string {
 	data, err := os.ReadFile(conf.File)
 	if err != nil {
 		log.Printf("Error occured: %s\n", err)
@@ -62,7 +40,7 @@ func ReadCurrentIPs(conf Configuration) string {
 
 func main() {
 
-	conf := ReadConfig()
+	conf := ReadConfigDefault().UnwrapMessage("Error reading config: %s")
 	page := template.Must(template.ParseFiles("./index.html"))
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -146,14 +124,5 @@ func main() {
 		page.Execute(w, FT{currentIps, "", conf.Host, conf.Domain})
 	})
 
-	if len(conf.Addresses) < 1 {
-		log.Fatal("No addresses to listen")
-	}
-	last := conf.Addresses[len(conf.Addresses)-1]
-	for _, addr := range conf.Addresses[:len(conf.Addresses)-1] {
-		go func(addr string) {
-			log.Fatal(http.ListenAndServe(addr, nil))
-		}(addr)
-	}
-	log.Fatal(http.ListenAndServe(last, nil))
+	ListenMultiplyFatal(conf.Addresses).Unwrap()
 }
