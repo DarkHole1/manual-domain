@@ -26,20 +26,15 @@ func ExceptLast[T any](arr []T) []T {
 	return arr[:len(arr)-1]
 }
 
-func UnwrapMessage[T any](msg string, val T, err error) T {
-	if err != nil {
-		log.Fatalf(msg, err)
-	}
-	return val
-}
-
 // Calls http.Listen and exits the program with log.Fatal
 func ListenFatal(addr string, handler http.Handler) {
 	log.Fatal(http.ListenAndServe(addr, handler))
 }
 
 // Like ListenFatal, but listens multiply addresses simultanously.
-// Blocks execution. Can fail if no addresses is passed
+// Blocks execution. Can fail if no addresses is passed.
+// Note: It uses Result, however, it succees with nil. So using Result
+// here isn't necessary, but it used for consistency.
 func ListenMultiplyFatal(addresses []string) Result[interface{}] {
 	if len(addresses) < 1 {
 		return ResultErrMessage[interface{}]("No addresses to listen")
